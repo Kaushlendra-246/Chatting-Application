@@ -5,7 +5,7 @@ import java.awt.event.*; //for ActionListener (action perform when we click img)
 import java.util.*; //For calender
 import java.text.*; //for time formating
 
-public class Server extends JFrame implements ActionListener{
+public class Client extends JFrame implements ActionListener{
 
     //Decleare globle var, show that it can be access in constructor as well as method
     JTextField text; //for text field
@@ -14,7 +14,7 @@ public class Server extends JFrame implements ActionListener{
 
 
     // JFrame = swing
-    Server() { //All coding of server frame
+    Client() { //All coding of server frame
 
         setLayout(null); //We set Panel According to me
 
@@ -44,7 +44,7 @@ public class Server extends JFrame implements ActionListener{
         );
 
         //(2)Profile img
-        ImageIcon i4 = new ImageIcon(ClassLoader.getSystemResource("icons/S.jpg"));
+        ImageIcon i4 = new ImageIcon(ClassLoader.getSystemResource("icons/C.jpg"));
         Image i5 = i4.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT);
         ImageIcon i6 = new ImageIcon(i5);
         JLabel profile = new JLabel(i6); //Can't pass i5 directally
@@ -76,7 +76,7 @@ public class Server extends JFrame implements ActionListener{
         p1.add(more); //Set img on panel
 
         //How to set name?
-        JLabel name = new JLabel("Kaushlendra"); //Pass name
+        JLabel name = new JLabel("Unknown"); //Pass name
         name.setBounds(110, 15, 150, 15); //Coordinate and size of text
         name.setForeground(Color.WHITE); //Set text color not background
         name.setFont(new Font("SAN_SERIF", Font.BOLD, 18));
@@ -185,6 +185,6 @@ public class Server extends JFrame implements ActionListener{
     
     public static void main(String[] args) {
         
-        new Server(); //Anynomous obj
+        new Client(); //Anynomous obj
     }
 }
