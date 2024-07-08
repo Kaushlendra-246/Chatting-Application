@@ -2,28 +2,32 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*; //colour, --
 import java.awt.event.*; //for ActionListener (action perform when we click img)
+import java.io.*; //for I/O
 import java.util.*; //For calender
 import java.text.*; //for time formating
+import java.net.*; // Server
 
-public class Server extends JFrame implements ActionListener{
+public class Server implements ActionListener{
 
     //Decleare globle var, show that it can be access in constructor as well as method
     JTextField text; //for text field
     JPanel al; //for text area
-    Box vertical = Box.createVerticalBox();
-
+    //these are also used in static main()
+    static Box vertical = Box.createVerticalBox();
+    static JFrame f = new JFrame();
+    static DataOutputStream dout;
 
     // JFrame = swing
     Server() { //All coding of server frame
 
-        setLayout(null); //We set Panel According to me
+        f.setLayout(null); //We set Panel According to me
 
         //How to divide Frame into Panel?
         JPanel p1 = new JPanel(); //divide Frame
         p1.setBackground(new Color(7, 94, 84));
         p1.setBounds(0, 0, 450, 70); //Set panel on frame
         p1.setLayout(null); //we set img on panel acco. to me
-        add(p1);
+        f.add(p1);
 
         //How to set Image?
         //(1)Back (Arrow) button
@@ -44,7 +48,7 @@ public class Server extends JFrame implements ActionListener{
         );
 
         //(2)Profile img
-        ImageIcon i4 = new ImageIcon(ClassLoader.getSystemResource("icons/S.jpg"));
+        ImageIcon i4 = new ImageIcon(ClassLoader.getSystemResource("icons/2.png"));
         Image i5 = i4.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT);
         ImageIcon i6 = new ImageIcon(i5);
         JLabel profile = new JLabel(i6); //Can't pass i5 directally
@@ -93,13 +97,13 @@ public class Server extends JFrame implements ActionListener{
         al = new JPanel();
         al.setBounds(5, 75, 440, 575); //set size and co-ordinate
         //al.setBounds(5, 75, 425, 560); // if minimize, Maximize and cut button is not removed
-        add(al); //set on frame
+        f.add(al); //set on frame
 
         //Where we type chats
         text = new JTextField();
         text.setBounds(5, 655, 310, 40); //co-ordinate and size
         text.setFont(new Font("SAN_SERIF", Font.PLAIN, 16)); //default size of typing text is 12(probably)
-        add(text); //set on frame
+        f.add(text); //set on frame
 
         //Send button?
         JButton send = new JButton("Send");
@@ -108,52 +112,59 @@ public class Server extends JFrame implements ActionListener{
         send.setForeground(Color.WHITE);
         send.addActionListener(this); //for performing opration
         send.setFont(new Font("SAN_SERIF", Font.PLAIN, 16));
-        add(send); // set on frame
+        f.add(send); // set on frame
 
         //How to set Frame Size and Color?
-        setSize(450, 700);
-        setLocation(200,100);
-        setUndecorated(true); //Remove minimize, Maximize and cut button
-        getContentPane().setBackground(new Color(197, 242, 252)); //getContentPane() = select whole frame
+        f.setSize(450, 700);
+        f.setLocation(200,100);
+        f.setUndecorated(true); //Remove minimize, Maximize and cut button
+        f.getContentPane().setBackground(new Color(197, 242, 252)); //getContentPane() = select whole frame
         //color can be also def as "Color.col"
 
-        setVisible(true);
+        f.setVisible(true);
     }
 
     //Over-ride Abstract method in ActionListener otherwise Server show error
     public void actionPerformed(ActionEvent ae){
-        //take text from text field
-        String out = text.getText(); //typed text are store into out var in String format
+        try {
+            //take text from text field
+            String out = text.getText(); //typed text are store into out var in String format
 
-        //Why we create Panel of string? Ans1 = below
+            //Why we create Panel of string? Ans1 = below
 
-        // (1) when text is not formated
-        // JLabel output = new JLabel(out);
-        // JPanel p2 = new JPanel();
-        // p2.add(output);
+            // (1) when text is not formated
+            // JLabel output = new JLabel(out);
+            // JPanel p2 = new JPanel();
+            // p2.add(output);
 
-        //After text formatting
-        JPanel p2 = formatLabel(out);
+            //After text formatting
+            JPanel p2 = formatLabel(out);
 
-        //show on text area
-        al.setLayout(new BorderLayout()); //add left, right, top, down or centre
-        JPanel right = new JPanel(new BorderLayout());
-        //Ans1 = add method in JPanel can't take string as argument
-        right.add(p2, BorderLayout.LINE_END); //shift right (End of the line)
+            //show on text area
+            al.setLayout(new BorderLayout()); //add left, right, top, down or centre
+            JPanel right = new JPanel(new BorderLayout());
+            //Ans1 = add method in JPanel can't take string as argument
+            right.add(p2, BorderLayout.LINE_END); //shift right (End of the line)
 
-        //for new text
-        vertical.add(right);
-        vertical.add(Box.createVerticalStrut(15)); //height = according to text
+            //for new text
+            vertical.add(right);
+            vertical.add(Box.createVerticalStrut(15)); //height = according to text
 
-        al.add(vertical, BorderLayout.PAGE_START); //Where vertical show?
+            al.add(vertical, BorderLayout.PAGE_START); //Where vertical show?
 
-        //set textField empty
-        text.setText("");
+            //send to Client
+            dout.writeUTF(out); //use try, catch otherwise showing error
 
-        //After sending massege, frame is reloaded
-        repaint();
-        invalidate();
-        validate();;
+            //set textField empty
+            text.setText("");
+
+            //After sending massege, frame is reloaded
+            f.repaint();
+            f.invalidate();
+            f.validate();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
 
     }
 
@@ -186,5 +197,31 @@ public class Server extends JFrame implements ActionListener{
     public static void main(String[] args) {
         
         new Server(); //Anynomous obj
+
+        try{
+            //Create a server on port no 6001
+            ServerSocket skt = new ServerSocket(6001);
+            //Accept massages infinitly
+            while (true) {
+                Socket s = skt.accept();
+                DataInputStream din = new DataInputStream(s.getInputStream()); //inside java.io
+                dout = new DataOutputStream(s.getOutputStream());
+
+                //Protocols
+                while(true){
+                    String msg = din.readUTF(); //readUTF = protocols
+                    JPanel panel = formatLabel(msg); //pass in formatLabel
+
+                    //Add on left
+                    JPanel left = new JPanel(new BorderLayout());
+                    left.add(panel, BorderLayout.LINE_START);
+                    //for these we need to create vertical & validate static because these are inside static main()
+                    vertical.add(left);
+                    f.validate(); //refresh frame
+                }
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }
