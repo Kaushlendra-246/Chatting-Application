@@ -1,8 +1,17 @@
 import javax.swing.*;
-import java.awt.*; //colour, ..
+import javax.swing.border.*;
+import java.awt.*; //colour, --
 import java.awt.event.*; //for ActionListener (action perform when we click img)
+import java.util.*; //For calender
+import java.text.*; //for time formating
 
 public class Server extends JFrame implements ActionListener{
+
+    //Decleare globle var, show that it can be access in constructor as well as method
+    JTextField text; //for text field
+    JPanel al; //for text area
+    Box vertical = Box.createVerticalBox();
+
 
     // JFrame = swing
     Server() { //All coding of server frame
@@ -81,13 +90,13 @@ public class Server extends JFrame implements ActionListener{
         p1.add(status); //set on panel
 
         //Add new frame for "text area"
-        JPanel al = new JPanel();
+        al = new JPanel();
         al.setBounds(5, 75, 440, 575); //set size and co-ordinate
         //al.setBounds(5, 75, 425, 560); // if minimize, Maximize and cut button is not removed
         add(al); //set on frame
 
         //Where we type chats
-        JTextField text = new JTextField();
+        text = new JTextField();
         text.setBounds(5, 655, 310, 40); //co-ordinate and size
         text.setFont(new Font("SAN_SERIF", Font.PLAIN, 16)); //default size of typing text is 12(probably)
         add(text); //set on frame
@@ -97,6 +106,7 @@ public class Server extends JFrame implements ActionListener{
         send.setBounds(320, 655, 123, 40);
         send.setBackground(new Color(7, 94, 84));
         send.setForeground(Color.WHITE);
+        send.addActionListener(this); //for performing opration
         send.setFont(new Font("SAN_SERIF", Font.PLAIN, 16));
         add(send); // set on frame
 
@@ -112,7 +122,65 @@ public class Server extends JFrame implements ActionListener{
 
     //Over-ride Abstract method in ActionListener otherwise Server show error
     public void actionPerformed(ActionEvent ae){
-        
+        //take text from text field
+        String out = text.getText(); //typed text are store into out var in String format
+
+        //Why we create Panel of string? Ans1 = below
+
+        // (1) when text is not formated
+        // JLabel output = new JLabel(out);
+        // JPanel p2 = new JPanel();
+        // p2.add(output);
+
+        //After text formatting
+        JPanel p2 = formatLabel(out);
+
+        //show on text area
+        al.setLayout(new BorderLayout()); //add left, right, top, down or centre
+        JPanel right = new JPanel(new BorderLayout());
+        //Ans1 = add method in JPanel can't take string as argument
+        right.add(p2, BorderLayout.LINE_END); //shift right (End of the line)
+
+        //for new text
+        vertical.add(right);
+        vertical.add(Box.createVerticalStrut(15)); //height = according to text
+
+        al.add(vertical, BorderLayout.PAGE_START); //Where vertical show?
+
+        //set textField empty
+        text.setText("");
+
+        //After sending massege, frame is reloaded
+        repaint();
+        invalidate();
+        validate();;
+
+    }
+
+    //Text formatting
+    public static JPanel formatLabel(String out){
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        JLabel output = new JLabel("<html> <p style = \"width: 150px\">" + out + "</p> </html>");
+        output.setFont(new Font("Tahoma", Font.PLAIN, 16));
+        output.setBackground(new Color(37,211,102));
+        output.setOpaque(true); //backGround color is visible
+        output.setBorder(new EmptyBorder(15, 15, 15, 50)); //inside "swing.border"
+
+        panel.add(output);
+
+        //time
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+
+        JLabel time = new JLabel();
+        //dynamically set current time
+        time.setText(sdf.format(cal.getTime()));
+
+        panel.add(time);
+
+        return panel;
     }
     
     public static void main(String[] args) {
