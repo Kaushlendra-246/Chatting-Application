@@ -116,7 +116,7 @@ public class Client implements ActionListener{
 
         //How to set Frame Size and Color?
         f.setSize(450, 700);
-        f.setLocation(200,100);
+        f.setLocation(700,100);
         f.setUndecorated(true); //Remove minimize, Maximize and cut button
         f.getContentPane().setBackground(new Color(197, 242, 252)); //getContentPane() = select whole frame
         //color can be also def as "Color.col"
